@@ -5,17 +5,17 @@ description: >
   OpenAPI, versioning, breaking changes, deprecation, webhooks, idempotency, contract
   tests, ship-check, or is unsure which skill to load. Also when they say
   "/api-ship-check", "which API skill", "api platform", or in Chinese
-  "接口审查", "兼容性", "破坏性变更", "弃用", "幂等", "Webhook", "该用哪个 skill".
-  Do NOT use for pure REST naming/style (plural nouns, status code etiquette only).
+  "接口审查", "兼容性", "破坏性变更", "弃用", "幂等", "Webhook", "变更日志",
+  "该用哪个 skill". Do NOT use for pure REST naming/style (plural nouns only).
 ---
 
 # Using API Platform Skills
 
-> Router only. Load the smallest skill. Never load all nine.
+> Router only. Load the smallest skill. Never load the whole pack.
 
 ## Overview
 
-This pack owns the **evolution layer** (compat, breaks, deprecation, CDC, idempotency, webhooks, API surface security). For pure REST style guides, say out-of-scope.
+This pack owns the **evolution layer** (compat, breaks, deprecation, CDC, idempotency, webhooks, API surface security, consumer changelogs). For pure REST style guides, say out-of-scope.
 
 ## Routing table
 
@@ -29,6 +29,7 @@ This pack owns the **evolution layer** (compat, breaks, deprecation, CDC, idempo
 | Double charge, Idempotency-Key, retries | `idempotency-and-retries` | - |
 | Callbacks, signed events | `webhook-design` | `idempotency-and-retries` |
 | BOLA/BFLA, excess data, mass assignment | `secure-api-surface` | - |
+| Release notes / partner changelog | `api-changelog` | `breaking-change-review` |
 | Pre-merge can we ship? | Ship-check below | - |
 | Only "is plural nouns correct?" | Out of scope (shape packs) | - |
 
@@ -41,6 +42,7 @@ Run in order; stop at first hard gate failure:
 3. `secure-api-surface` - critical authz / exposure
 4. Mutations/retries -> `idempotency-and-retries`
 5. Outbound events -> `webhook-design`
+6. After merge decision -> `api-changelog` for consumer notes
 
 ## Steps
 

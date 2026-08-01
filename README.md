@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/Wanbinyu/api-platform-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
   <a href="https://github.com/agentskills/agentskills"><img src="https://img.shields.io/badge/format-Agent%20Skills-111827" alt="Agent Skills" /></a>
-  <a href="https://github.com/Wanbinyu/api-platform-skills/releases"><img src="https://img.shields.io/badge/version-0.1.2-0ea5e9" alt="v0.1.2" /></a>
+  <a href="https://github.com/Wanbinyu/api-platform-skills/releases"><img src="https://img.shields.io/badge/version-0.1.3-0ea5e9" alt="v0.1.3" /></a>
   <img src="https://img.shields.io/badge/Claude-Codex-Cursor-Gemini-Copilot-7c3aed" alt="Multi harness" />
 </p>
 
@@ -35,7 +35,7 @@
 
 ## What you get
 
-Install once. Your agent learns **nine workflows** for the hard part of HTTP APIs:
+Install once. Your agent learns **ten workflows** for the hard part of HTTP APIs:
 
 | When your agent is… | It should run… |
 |---------------------|----------------|
@@ -45,6 +45,7 @@ Install once. Your agent learns **nine workflows** for the hard part of HTTP API
 | Designing `POST /payments` | **Idempotency & retries** |
 | Pushing events to customers | **Webhook design** |
 | Reviewing public routes for abuse | **Secure API surface** (product APIs) |
+| Writing partner release notes | **API changelog** |
 
 Each skill ships with:
 
@@ -157,6 +158,9 @@ Keep folder names unchanged. Each skill is `skills/<name>/SKILL.md`.
                      consumer-driven-contract
                               │
                               ▼
+                     api-changelog  (tell consumers)
+                              │
+                              ▼
                      /api-ship-check  (gate them in order)
 ```
 
@@ -173,6 +177,7 @@ Keep folder names unchanged. Each skill is `skills/<name>/SKILL.md`.
 | 6 | [`idempotency-and-retries`](skills/idempotency-and-retries/SKILL.md) | Keys, storage, safe retries |
 | 7 | [`webhook-design`](skills/webhook-design/SKILL.md) | Sign, replay, at-least-once |
 | 8 | [`secure-api-surface`](skills/secure-api-surface/SKILL.md) | BOLA/BFLA, oversharing, mass-assignment |
+| 9 | [`api-changelog`](skills/api-changelog/SKILL.md) | Consumer-facing release notes from diffs |
 
 ### Natural language triggers
 
@@ -251,6 +256,7 @@ If a skill can’t fail a checklist, it doesn’t ship. See [CONTRIBUTING.md](CO
 | **0.1** | Nine skills · toy OpenAPI · installers · golden report |
 | **0.1.1** | Claude-native install · bilingual triggers · skill validator CI |
 | **0.1.2** | Billing fixtures · sample reports · `openapi_breaking_diff.py` |
+| **0.1.3** | `api-changelog` skill · param-aware OpenAPI diff |
 | **0.2** | More real-world samples · eval harness |
 | **0.3** | Lightweight eval fixtures (agent with/without skill) |
 | **0.4** | Optional gRPC / GraphQL evolution add-ons |

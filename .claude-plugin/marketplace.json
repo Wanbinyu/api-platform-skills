@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Claude Code marketplace for API Platform Skills — contract evolution, not REST naming tutorials.",
-    "version": "0.1.2"
+    "version": "0.1.3"
   },
   "plugins": [
     {
       "name": "api-platform-skills",
       "source": "./",
-      "version": "0.1.2",
-      "description": "Nine skills for API contract evolution: OpenAPI gates, breaking-change review, deprecation, CDC, idempotency, webhooks, secure API surface.",
+      "version": "0.1.3",
+      "description": "Ten skills for API contract evolution: OpenAPI gates, breaking-change review, deprecation, CDC, idempotency, webhooks, secure API surface, consumer changelogs.",
       "keywords": [
         "api",
         "openapi",

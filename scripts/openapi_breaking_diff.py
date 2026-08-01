@@ -350,6 +350,71 @@ def security_sig(sec: list[Any]) -> str:
         return str(sec)
 
 
+def param_key(param: dict[str, Any]) -> tuple[str, str]:
+    return (str(param.get("in") or "query"), str(param.get("name") or ""))
+
+
+def normalize_params(root: dict[str, Any], op: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
+    out: dict[tuple[str, str], dict[str, Any]] = {}
+    for raw in op.get("parameters") or []:
+        p = resolve_ref(root, raw)
+        if not isinstance(p, dict):
+            continue
+        key = param_key(p)
+        if not key[1]:
+            continue
+        schema = resolve_ref(root, p.get("schema") or {})
+        out[key] = {
+            "required": bool(p.get("required")),
+            "schema": schema if isinstance(schema, dict) else {},
+        }
+    return out
+
+
+def compare_parameters(
+    deltas: list[Delta],
+    root_old: dict[str, Any],
+    root_new: dict[str, Any],
+    oop: dict[str, Any],
+    nop: dict[str, Any],
+    loc: str,
+) -> None:
+    old_p = normalize_params(root_old, oop)
+    new_p = normalize_params(root_new, nop)
+    for key in sorted(set(old_p) - set(new_p)):
+        where, name = key
+        add_delta(
+            deltas,
+            kind="parameter_removed",
+            cls="breaking",
+            path=f"{loc} {where}.{name}",
+            detail=f"{where} parameter removed: {name}",
+        )
+    for key in sorted(set(new_p) - set(old_p)):
+        where, name = key
+        req = new_p[key]["required"]
+        add_delta(
+            deltas,
+            kind="parameter_added",
+            cls="breaking" if req else "non-breaking",
+            path=f"{loc} {where}.{name}",
+            detail=f"{where} parameter added: {name}" + (" (required)" if req else " (optional)"),
+        )
+    for key in sorted(set(old_p) & set(new_p)):
+        where, name = key
+        o, n = old_p[key], new_p[key]
+        ploc = f"{loc} {where}.{name}"
+        if not o["required"] and n["required"]:
+            add_delta(
+                deltas,
+                kind="parameter_required",
+                cls="breaking",
+                path=ploc,
+                detail=f"{where} parameter became required: {name}",
+            )
+        compare_schemas(deltas, o["schema"], n["schema"], ploc, side="request")
+
+
 def diff_specs(old: dict[str, Any], new: dict[str, Any]) -> list[Delta]:
     deltas: list[Delta] = []
 
@@ -422,6 +487,9 @@ def diff_specs(old: dict[str, Any], new: dict[str, Any]) -> list[Delta]:
                 path=loc,
                 detail=f"success status {c} added",
             )
+
+        # parameters (path/query/header)
+        compare_parameters(deltas, old, new, oop, nop, loc)
 
         # request schema
         compare_schemas(
@@ -538,6 +606,18 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     deltas = diff_specs(old, new)
+    # de-dupe identical findings (e.g. enum reported twice)
+    seen: set[tuple[str, str, str]] = set()
+    unique: list[Delta] = []
+    for d in deltas:
+        key = (d["kind"], d["path"], d["detail"])
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(d)
+    for i, d in enumerate(unique, start=1):
+        d["id"] = i
+    deltas = unique
     public = [to_public(d) for d in deltas]
     md = render_markdown(args.old, args.new, deltas)
 

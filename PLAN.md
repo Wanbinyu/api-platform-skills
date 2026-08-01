@@ -6,7 +6,8 @@
 
 ## Done
 
-- [x] Nine evolution-layer skills (not another `api-design`)  
+- [x] Ten evolution-layer skills (incl. `api-changelog`)  
+
 - [x] Distinct positioning doc  
 - [x] Toy OpenAPI + golden report  
 - [x] Install scripts  
