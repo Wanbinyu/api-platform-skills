@@ -1,5 +1,5 @@
 ---
-description: Consumer-driven contract plan
+description: Consumer-driven contract / Pact-style plan
 ---
 
-Load and follow the skill `consumer-driven-contract`.
+Follow `consumer-driven-contract`. Capture minimal consumer interactions and a provider CI verification plan.

@@ -1,5 +1,5 @@
 ---
-description: API deprecation plan
+description: Dated API deprecation and sunset plan
 ---
 
-Load and follow the skill `deprecation-playbook`. Produce a dated deprecation plan with signals and rollback.
+Follow `deprecation-playbook`. Produce a dated plan with strategy, signals, consumer checklist, and rollback.

@@ -1,6 +1,9 @@
 # Use with Claude / Claude Code
 
-These skills already use the standard **`SKILL.md`** format Claude Code understands. You can install them three ways.
+These skills use the standard **`SKILL.md`** format Claude Code understands.
+Descriptions include **English + Chinese** trigger phrases so both languages auto-match.
+
+You can install them three ways.
 
 ---
 

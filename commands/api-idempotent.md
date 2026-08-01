@@ -1,5 +1,5 @@
 ---
-description: Idempotency and retry design
+description: Design idempotency keys and safe retries for mutations
 ---
 
-Load and follow the skill `idempotency-and-retries`.
+Follow `idempotency-and-retries`. Cover mechanism, storage, conflict semantics, retry policy, and tests.

@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/Wanbinyu/api-platform-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
   <a href="https://github.com/agentskills/agentskills"><img src="https://img.shields.io/badge/format-Agent%20Skills-111827" alt="Agent Skills" /></a>
-  <a href="https://github.com/Wanbinyu/api-platform-skills"><img src="https://img.shields.io/badge/version-0.1.0-0ea5e9" alt="v0.1.0" /></a>
+  <a href="https://github.com/Wanbinyu/api-platform-skills/releases"><img src="https://img.shields.io/badge/version-0.1.1-0ea5e9" alt="v0.1.1" /></a>
   <img src="https://img.shields.io/badge/Claude-Codex-Cursor-Gemini-Copilot-7c3aed" alt="Multi harness" />
 </p>
 
@@ -237,7 +237,8 @@ If a skill can’t fail a checklist, it doesn’t ship. See [CONTRIBUTING.md](CO
 | Version | Focus |
 |---------|--------|
 | **0.1** | Nine skills · toy OpenAPI · installers · golden report |
-| **0.2** | CI check for skill structure · more sample reports |
+| **0.1.1** | Claude-native install · bilingual triggers · skill validator CI |
+| **0.2** | More sample reports · optional OpenAPI diff helper |
 | **0.3** | Lightweight eval fixtures (agent with/without skill) |
 | **0.4** | Optional gRPC / GraphQL evolution add-ons |
 

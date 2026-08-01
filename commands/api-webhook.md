@@ -1,5 +1,5 @@
 ---
-description: Webhook design
+description: Design signed, retry-safe outbound webhooks
 ---
 
-Load and follow the skill `webhook-design`.
+Follow `webhook-design`. Cover event ids, HMAC, retries, receiver contract, and ops/replay.

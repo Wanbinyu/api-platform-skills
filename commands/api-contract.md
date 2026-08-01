@@ -1,5 +1,5 @@
 ---
-description: Contract-first OpenAPI workflow
+description: Contract-first OpenAPI review before implementation
 ---
 
-Load and follow the skill `contract-first-openapi`. Produce the report template. Do not implement handlers until the review gate passes or the user explicitly overrides.
+Follow `contract-first-openapi`. Produce the contract-first report with review gate and ready/blocked decision. Do not implement handlers until the gate passes or the user explicitly overrides.

@@ -1,6 +1,6 @@
 {
   "name": "api-platform-skills",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Agent skills for API contract evolution: breaking-change review, compatibility matrices, deprecation, CDC, idempotency, webhooks, and product API surface security. Not another REST naming pack.",
   "author": {
     "name": "Wanbinyu",

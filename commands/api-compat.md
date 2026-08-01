@@ -1,5 +1,5 @@
 ---
-description: Consumer compatibility / blast radius matrix
+description: Consumer blast-radius / compatibility matrix for an API change
 ---
 
-Load and follow the skill `compatibility-matrix`. Build delta × consumer impact matrix and a go/no-go recommendation.
+Follow `compatibility-matrix`. Build delta x consumer impact matrix and a go/no-go recommendation. Mark unknowns explicitly.
