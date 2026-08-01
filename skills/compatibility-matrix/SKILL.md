@@ -1,66 +1,60 @@
 ---
 name: compatibility-matrix
 description: >
-  Build a compatibility impact matrix for an API change. Use when asking who breaks if
-  a field, endpoint, status code, or auth behavior changes; when planning migrations;
-  or when the user says "/api-compat", "blast radius", or "consumer impact".
+  Build a consumer blast-radius matrix for an API change. Use when asking who breaks
+  if a field/endpoint/status/auth changes; planning migrations; or "/api-compat",
+  "blast radius", "consumer impact". Distinct from generic design skills — this is impact analysis.
 ---
 
 # Compatibility Matrix
 
+> Rows are deltas. Columns are consumers. Empty cells are failures.
+
 ## Overview
 
-Before changing a shipped contract, map **what changes** → **who consumes it** → **impact severity** → **required mitigation**. Guessing is not allowed; document unknowns explicitly.
+Map **what changes → who consumes it → severity → mitigation**. Document unknowns; do not invent traffic you cannot evidence.
 
 ## Steps
 
-1. **Define the change set**
-   - List each delta: add/remove/rename/retype field, path change, status change, header change, auth change, semantic change (same shape, different meaning).
+1. **Freeze the change set**  
+   Atomic deltas only: add/remove/rename/retype, path, status, header, auth, **semantic** change (same JSON, new meaning).
 
-2. **Inventory consumers** (best effort)
-   - First-party web/mobile
-   - Internal services
-   - External partners / public docs
-   - Generated SDKs
-   - Jobs/cron/webhooks
-   - Unknown (mark explicitly)
-
-   Sources: repo grep for paths/operationIds, API gateway logs notes, README, SDK packages, OpenAPI `x-consumers` if present, team knowledge stated by user.
+2. **Inventory consumers** (best effort)  
+   First-party web/mobile · internal services · partners · SDKs · jobs/webhooks · **unknown**.  
+   Evidence: grep paths/operationIds, gateway notes, README, user-stated owners.
 
 3. **Classify each delta**
 
    | Class | Examples |
    |-------|----------|
-   | Safe additive | New optional field, new endpoint, new optional query param |
-   | Soft risk | New required field on request without default; tighter validation |
-   | Hard break | Remove/rename field; change type; change status meaning; remove endpoint |
-   | Semantic break | Same JSON, different meaning (e.g. amount now cents) |
+   | Safe additive | New optional field, new endpoint |
+   | Soft risk | New required request field; tighter validation |
+   | Hard break | Remove/rename/retype; remove endpoint |
+   | Semantic break | Same shape, different meaning (e.g. cents → dollars) |
 
-4. **Build matrix**
+4. **Fill the matrix**  
+   Cells: `none | low | high | unknown` + one-line reason.
 
-   Rows = deltas, columns = consumers, cells = impact: `none | low | high | unknown` + note.
+5. **Mitigations for every high/unknown**  
+   Dual-write/read · deprecation window · version bump · adapter · feature flag · research task.
 
-5. **Mitigations**
-   - For each `high` or `unknown`: dual-write, dual-read, deprecation window, version bump, feature flag, adapter layer.
-   - Prefer additive + deprecate over hard break.
-
-6. **Decision**
-   - Ship additive / ship with version / block pending consumer work / needs research (list how to resolve unknowns).
+6. **Decision**  
+   `ship-additive` · `version-bump` · `block` · `research`.
 
 ## Exit criteria
 
-- [ ] Change set enumerated as discrete deltas
-- [ ] At least one consumer inventory attempt documented (even if all unknown)
-- [ ] Matrix filled with severity per delta × consumer
-- [ ] Every high/unknown has a mitigation or explicit research task
-- [ ] Go / no-go recommendation stated
+- [ ] Discrete deltas listed  
+- [ ] Consumer inventory attempted (unknowns explicit)  
+- [ ] Matrix complete for delta × consumer  
+- [ ] Every high/unknown has mitigation or research task  
+- [ ] Go/no-go stated  
 
 ## Anti-patterns
 
-- "Only mobile uses this" without evidence
-- Treating semantic changes as non-breaking because JSON schema still validates
-- Empty matrix with "LGTM"
-- Ignoring machine consumers (jobs, webhooks, SDKs)
+- “Only mobile uses this” with no evidence  
+- Treating semantic breaks as safe because JSON Schema still validates  
+- Empty matrix + “LGTM”  
+- Ignoring machine consumers (cron, webhooks, generated SDKs)
 
 ## Output template
 
@@ -68,7 +62,7 @@ Before changing a shipped contract, map **what changes** → **who consumes it**
 ## Compatibility matrix
 
 ### Change set
-1. ...
+1. …
 
 ### Consumers
 | id | type | evidence | owner |
@@ -77,7 +71,6 @@ Before changing a shipped contract, map **what changes** → **who consumes it**
 ### Matrix
 | delta | consumer A | consumer B | unknown |
 |-------|------------|------------|---------|
-| ... | high: reason | none | unknown |
 
 ### Mitigations
 | delta | plan | owner | ETA |
@@ -85,5 +78,5 @@ Before changing a shipped contract, map **what changes** → **who consumes it**
 
 ### Decision
 - Recommendation: ship-additive | version-bump | block | research
-- Rationale: ...
+- Rationale: …
 ```

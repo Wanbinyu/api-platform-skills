@@ -1,70 +1,45 @@
 ---
 name: webhook-design
 description: >
-  Design reliable, secure webhooks and outbound event delivery. Use when adding
-  callbacks, Stripe-like event posts, partner notifications, or when the user says
-  "/api-webhook", "event delivery", or "signed webhooks".
+  Design signed, retry-safe outbound webhooks. Use for callbacks, partner event posts,
+  "/api-webhook", "event delivery", "signed webhooks". Focus on event identity, HMAC,
+  at-least-once delivery — not generic REST CRUD style.
 ---
 
 # Webhook Design
 
+> You are the client now. Receivers are hostile and slow.
+
 ## Overview
 
-Webhooks are **asynchronous public APIs you call on customers**. Assume at-least-once delivery, hostile receivers, and replay attacks. Design signing, retries, and event identity up front.
+Assume **at-least-once** delivery, replay attacks, and flaky receivers. Lock event ids, signatures, retries, and consumer dedupe.
 
 ## Steps
 
-1. **Event model**
-   - Event types (stable strings)
-   - Event id (unique, for consumer dedupe)
-   - Payload versioning (`api_version` or schema version)
-   - Thin vs thick payloads (id-only + fetch vs full snapshot) — pick and document
-
-2. **Delivery semantics**
-   - At-least-once (default)
-   - Ordering: per-resource best-effort vs none (document clearly)
-   - Retry schedule with exponential backoff + give-up + dead-letter/manual replay
-
-3. **Security**
-   - HMAC signature header (algorithm, which bytes signed, timestamp)
-   - Timestamp tolerance to limit replay
-   - Optional mTLS or IP allowlist for enterprise
-   - Secrets rotation process
-   - Never send secrets in query strings
-
-4. **Receiver contract**
-   - Expected success status codes (2xx)
-   - Timeout budget (e.g. 5s) — slow receivers get retries
-   - Consumer idempotency on `event.id`
-
-5. **Observability**
-   - Delivery attempts log: event id, URL host, status, latency
-   - Dashboard: failure rate, oldest unacknowledged
-
-6. **API surface for management** (if productized)
-   - Register URL, rotate secret, list event types, test ping endpoint
-
-7. **Docs checklist**
-   - Signature verification sample
-   - Retry policy
-   - Event catalog
+1. **Event model** — stable type strings · unique event id · payload version · thin vs thick body (document choice).  
+2. **Delivery** — retry schedule + give-up + dead-letter/manual replay · ordering guarantees (per-resource best-effort vs none).  
+3. **Security** — HMAC (algorithm, signed bytes, header names) · timestamp skew window · secret rotation · no secrets in query strings · optional mTLS/allowlist.  
+4. **Receiver contract** — 2xx success · timeout budget · consumer must dedupe on `event.id`.  
+5. **Observability** — attempts log · failure rate · oldest unacked.  
+6. **Management API** (if productized) — register URL, rotate secret, test ping.  
+7. **Docs** — verify sample · retry policy · event catalog.
 
 ## Exit criteria
 
-- [ ] Event types + event id scheme defined
-- [ ] Delivery/retry/give-up policy written
-- [ ] Signature scheme specified (headers + algorithm + rotation)
-- [ ] Receiver timeout and success codes documented
-- [ ] Consumer dedupe guidance included
-- [ ] Ops/replay path mentioned
+- [ ] Event types + id scheme  
+- [ ] Retry / give-up / replay  
+- [ ] Signature + rotation  
+- [ ] Receiver timeout + success codes  
+- [ ] Consumer dedupe guidance  
+- [ ] Ops/replay path  
 
 ## Anti-patterns
 
-- Unsigned webhooks to the public internet
-- Infinite retries with no backoff
-- Assuming exactly-once delivery
-- Changing event payload shape without versioning
-- Logging full payloads with PII at info level
+- Unsigned public webhooks  
+- Infinite retries, no backoff  
+- Claiming exactly-once  
+- Payload shape changes without versioning  
+- Info-logging full PII payloads  
 
 ## Output template
 
@@ -77,21 +52,21 @@ Webhooks are **asynchronous public APIs you call on customers**. Assume at-least
 
 ### Delivery
 - Semantics: at-least-once
-- Retry: ...
-- Give-up: ...
-- Replay: ...
+- Retry: …
+- Give-up: …
+- Replay: …
 
 ### Security
-- Signature: ...
-- Timestamp window: ...
-- Rotation: ...
+- Signature: …
+- Timestamp window: …
+- Rotation: …
 
 ### Receiver requirements
-- ...
+- …
 
 ### Observability
-- ...
+- …
 
 ### Open items
-- ...
+- …
 ```

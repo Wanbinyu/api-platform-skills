@@ -1,25 +1,42 @@
-# Toy Orders API (demo)
+# Toy Orders API
 
-Intentionally simple OpenAPI pair for practicing skills:
+Deliberate teaching fixture for **API Platform Skills**.
 
 | File | Role |
 |------|------|
-| `openapi.v1.yaml` | Shipped contract (baseline) |
-| `openapi.v2-bad.yaml` | Proposed change with **deliberate breaks** |
+| [`openapi.v1.yaml`](openapi.v1.yaml) | Shipped baseline |
+| [`openapi.v2-bad.yaml`](openapi.v2-bad.yaml) | Upgrade full of **silent breaks** |
+| [../sample-reports/breaking-change-v1-vs-v2-bad.md](../sample-reports/breaking-change-v1-vs-v2-bad.md) | Golden review |
 
-## Exercises
+## Try these prompts
 
-1. **breaking-change-review**  
-   Compare v1 vs v2-bad. Expect findings: removed field, renames, auth change, status change.
+**Breaking change**
 
-2. **compatibility-matrix**  
-   Assume consumers: `web-checkout`, `mobile-app`, `partner-erp` (unknown usage on partner).
+```text
+Compare openapi.v1.yaml with openapi.v2-bad.yaml.
+Follow breaking-change-review. Merge verdict required.
+```
 
-3. **deprecation-playbook**  
-   Plan how v1 `status` string → v2 enum should have been done safely.
+**Compatibility**
 
-4. **secure-api-surface**  
-   Review `GET /orders/{id}` for object-level auth notes (spec alone cannot prove IDOR — list what code must enforce).
+```text
+Build a compatibility-matrix. Consumers: web-checkout, mobile-app, partner-erp (unknown traffic).
+```
 
-5. **idempotency-and-retries**  
-   Design keys for `POST /orders` (v1 has no idempotency — propose additive change).
+**Deprecation (how v2 should have been done)**
+
+```text
+Using deprecation-playbook, plan a safe path from v1 status strings to a new enum.
+```
+
+**Idempotency**
+
+```text
+v1 POST /orders has no idempotency. Design an additive fix with idempotency-and-retries.
+```
+
+**Security surface**
+
+```text
+Review GET /orders/{orderId} with secure-api-surface. List what code must enforce beyond the spec.
+```

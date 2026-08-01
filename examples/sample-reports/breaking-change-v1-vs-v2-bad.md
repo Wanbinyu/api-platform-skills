@@ -1,27 +1,40 @@
-# Sample: Breaking change review (v1 → v2-bad)
+# Golden report — Breaking change review
 
-Golden answer for demos. Agents should surface similar findings.
+**Fixture:** `openapi.v1.yaml` → `openapi.v2-bad.yaml`  
+**Assumed maturity:** shipped public API  
+
+Agents should surface the same classes of findings (wording may differ).
+
+---
 
 ## Scope
 
-- Spec/code: `examples/toy-orders-api/openapi.v1.yaml` → `openapi.v2-bad.yaml`
-- API maturity: **shipped** (assumed)
+| Item | Value |
+|------|--------|
+| Specs | `examples/toy-orders-api/openapi.v1.yaml` → `openapi.v2-bad.yaml` |
+| Maturity | shipped |
+
+---
 
 ## Deltas
 
-| # | delta | class | client impact | migration |
-|---|-------|-------|---------------|-----------|
-| 1 | `listOrders` security removed | breaking | unauthenticated list; security regression | restore bearerAuth; treat as critical |
-| 2 | `createOrder` success `201` → `200` | breaking | clients checking 201 fail | keep 201 or version bump + docs |
-| 3 | `CreateOrderRequest.note` optional → required | breaking | old clients omit note → 400 | keep optional or default `""` + deprecate later |
-| 4 | `Order.total_cents` removed; `amount` dollars added | semantic-breaking | wrong money if clients assume cents | dual-publish both fields; migrate; then deprecate cents |
-| 5 | `Order.status` free string → enum OPEN/COMPLETE/VOID | breaking | pending/paid/… rejected or misunderstood | map old values; dual-read; long deprecation |
-| 6 | `Order.note` removed | breaking | UI/clients reading note break | deprecate field first |
-| 7 | `Order.customer_email` removed | breaking / product | may be intentional privacy | changelog + consumer notice |
-| 8 | `Order.internal_score` added | non-breaking add but **security risk** | excess data exposure | remove from public schema |
+| # | Delta | Class | Client impact | Migration |
+|---|--------|-------|---------------|-----------|
+| 1 | `listOrders` security removed | **breaking** | Unauthenticated list; security regression | Restore `bearerAuth`; treat as critical |
+| 2 | `createOrder` success `201` → `200` | **breaking** | Clients branching on 201 fail | Keep 201 or version + docs |
+| 3 | `note` optional → **required** on create | **breaking** | Old clients omit note → 400 | Keep optional or default `""` |
+| 4 | `total_cents` removed; `amount` dollars added | **semantic-breaking** | Wrong money if clients assume cents | Dual-publish both fields; migrate; then deprecate cents |
+| 5 | `status` free string → enum `OPEN/COMPLETE/VOID` | **breaking** | Old values misunderstood | Map old values; dual-read; long deprecation |
+| 6 | `Order.note` removed | **breaking** | Readers of note break | Deprecate first |
+| 7 | `customer_email` removed | **breaking** (may be intentional privacy) | Email consumers break | Changelog + notice |
+| 8 | `internal_score` added | additive but **security risk** | Excess data exposure | Remove from public schema |
+
+---
 
 ## Verdict
 
-**request-changes**
+### **request-changes**
 
-Do not merge v2-bad. Re-introduce additive evolution: keep v1 fields, add new fields optionally, use `deprecation-playbook` for removals, restore auth on listOrders, keep 201 for creates.
+Do **not** merge `v2-bad`.
+
+Safe path: additive evolution — keep v1 fields, add new fields as optional, use `deprecation-playbook` for removals, restore list auth, keep `201` for creates, never rename money units without dual-read.

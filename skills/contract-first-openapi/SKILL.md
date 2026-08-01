@@ -1,68 +1,69 @@
 ---
 name: contract-first-openapi
 description: >
-  Drive API work contract-first with OpenAPI (or equivalent). Use when designing a new
-  HTTP API, adding endpoints, writing or reviewing openapi.yaml/swagger, establishing
-  review gates before implementation, or when the user says "/api-contract" or
-  "spec before code". Prefer this over free-form endpoint inventing.
+  Contract-first OpenAPI workflow with a hard review gate before implementation.
+  Use when designing new HTTP APIs, adding endpoints, writing/reviewing openapi.yaml,
+  or when the user says "/api-contract", "spec before code", "OpenAPI first".
+  Not a REST naming style guide — focus on complete operations, errors, auth, and ready/blocked.
 ---
 
 # Contract-First OpenAPI
 
+> Spec is the product surface. Code implements the gate that passed.
+
 ## Overview
 
-Public HTTP APIs should have a reviewable contract **before** (or tightly coupled with) implementation. This skill produces a minimal-but-complete OpenAPI-oriented contract review and an implementation checklist — not a novel on REST naming.
+Produce a **minimal-but-complete** contract review and an implementation checklist. Skip essays on plural nouns; lock request/response/error/auth so evolution skills have a baseline.
 
 ## Steps
 
-1. **Discover existing contract**
-   - Search for `openapi.yaml`, `openapi.yml`, `swagger.json`, `openapi.json`, `api/**/*.yaml`, generated specs.
-   - Note source of truth: hand-written vs codegen vs framework annotations.
+1. **Find the source of truth**  
+   Search `openapi.yaml|yml`, `swagger.json`, `openapi.json`, annotated routes. Note hand-written vs generated.
 
-2. **Classify API surface**
-   - Public external / partner / internal-only / unreleased.
-   - Auth model: none, API key, session, OAuth2/JWT, mTLS.
-   - Consistency style: REST resources, RPC-over-HTTP, mixed.
+2. **Classify the surface**  
+   - Visibility: public · partner · internal · unreleased  
+   - Auth: none · API key · session · OAuth2/JWT · mTLS  
+   - Style: REST resources · RPC-over-HTTP · mixed  
 
-3. **Author or update contract (minimal complete set)**
-   For each operation ensure:
-   - `operationId`, method, path
-   - Request parameters/body schema with required fields
-   - Success response schema (not just `200 OK`)
-   - Error model (problem+json or project standard) for 4xx/5xx you will return
-   - Auth security requirement per operation
-   - Pagination shape if lists exist
-   - Idempotency header documented if mutation is retry-safe by design
+3. **Complete each in-scope operation**  
+   - `operationId`, method, path  
+   - Request params/body + **required** fields  
+   - Success schema (not bare `200 OK`)  
+   - Error model (problem+json or project standard)  
+   - Per-operation security  
+   - List pagination shape if applicable  
+   - Document idempotency headers when mutations are retry-safe by design  
 
-4. **Review gate (must pass before coding handlers)**
-   - [ ] No anonymous `object` / unconstrained maps on public fields without justification
-   - [ ] Breaking-risk fields marked; new fields optional by default
-   - [ ] Error codes stable and documented
-   - [ ] Examples for happy path + one validation error
-   - [ ] Versioning strategy stated (path `/v1`, header, or none + rationale)
+4. **Review gate (must pass before handlers)**  
 
-5. **Implementation checklist**
-   - Map each operation → handler/file
-   - List validation rules that must match schema
-   - List tests: contract/snapshot or schema assertion tests
+   | Check | Pass? |
+   |-------|-------|
+   | No anonymous free-form objects on public fields without justification | |
+   | New fields optional by default on shipped APIs | |
+   | Stable error shape documented | |
+   | Happy-path + one validation error example | |
+   | Versioning strategy stated (path / header / none + why) | |
 
-6. **Write report** using the output template.
+5. **Implementation checklist**  
+   Map operation → handler file · validations that must match schema · contract tests to add.
+
+6. Emit the report template.
 
 ## Exit criteria
 
-- [ ] Contract file path identified or created
-- [ ] Every in-scope operation has request + success + error shape
-- [ ] Review gate checklist completed (pass/fail with notes)
-- [ ] Implementation checklist produced
-- [ ] Explicit statement: ready to implement / blocked (why)
+- [ ] Spec path identified or created  
+- [ ] Every in-scope operation has request + success + error shape  
+- [ ] Review gate filled (pass/fail + notes)  
+- [ ] Implementation checklist written  
+- [ ] Explicit **ready** or **blocked** (with why)
 
 ## Anti-patterns
 
-- Inventing endpoints only in prose without schemas
-- `additionalProperties: true` everywhere "for flexibility"
-- Documenting only 200 responses
-- Changing implementation first and reverse-engineering OpenAPI later without calling out drift
-- Copying ECC-style resource naming essays instead of locking the actual contract
+- Prose endpoints with no schemas  
+- `additionalProperties: true` everywhere “for flexibility”  
+- Only documenting 200 responses  
+- Reverse-engineering OpenAPI after ship without calling out drift  
+- Padding the report with REST naming lectures (out of scope)
 
 ## Output template
 
@@ -71,11 +72,11 @@ Public HTTP APIs should have a reviewable contract **before** (or tightly couple
 
 ### Surface
 - Visibility: public | partner | internal | unreleased
-- Auth: ...
-- Spec path: `...`
-- Versioning: ...
+- Auth: …
+- Spec path: `…`
+- Versioning: …
 
-### Operations in scope
+### Operations
 | operationId | method path | request | responses | auth | notes |
 |-------------|-------------|---------|-----------|------|-------|
 
@@ -84,14 +85,14 @@ Public HTTP APIs should have a reviewable contract **before** (or tightly couple
 |-------|--------|-------|
 
 ### Implementation checklist
-- [ ] ...
+- [ ] …
 
 ### Ready?
 - [ ] Yes — implement against this contract
-- [ ] No — blockers: ...
+- [ ] No — blockers: …
 ```
 
 ## References
 
-- See repo `references/compatibility-rules.md` for what counts as a later break.
-- Pair with `breaking-change-review` when editing an already-shipped spec.
+- `references/compatibility-rules.md` — what becomes a break later  
+- Pair with `breaking-change-review` when editing a shipped spec  

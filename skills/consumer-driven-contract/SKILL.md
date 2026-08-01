@@ -1,58 +1,42 @@
 ---
 name: consumer-driven-contract
 description: >
-  Capture consumer expectations and turn them into contract tests. Use when multiple
-  clients depend on an API, when introducing Pact-style tests, when provider changes
-  must not break consumers, or when the user says "/api-cdc", "consumer contract",
-  or "Pact".
+  Capture consumer expectations and turn them into provider CI gates (CDC / Pact-style).
+  Use for multi-client APIs, contract tests, "/api-cdc", "consumer contract", "Pact".
+  Focus on minimal consumer assertions — not cloning the entire OpenAPI into a test.
 ---
 
 # Consumer-Driven Contract
 
+> Providers don’t guess. Consumers assert. CI enforces.
+
 ## Overview
 
-Provider-only OpenAPI is necessary but not sufficient. CDC captures **what consumers actually assert** (status, required fields, content-types) as executable checks the provider must pass.
+OpenAPI is necessary; CDC records **what each consumer actually requires** (status, required keys, content-type) as executable checks.
 
 ## Steps
 
-1. **Identify consumers in scope**
-   - Name each consumer app/service and owner.
-
-2. **Elicit expectations** (from code, not wishful thinking)
-   - Grep client code for paths, required JSON keys, status handling.
-   - For each interaction: given provider state → request → expected response minimum.
-
-3. **Write consumer contracts** (framework-agnostic shape)
-   - Prefer existing stack: Pact, Spring Cloud Contract, schemathesis against OpenAPI, custom schema tests.
-   - Each interaction must be minimal (only fields consumer needs).
-
-4. **Provider verification plan**
-   - How CI runs provider tests against contracts
-   - Can-i-deploy / gate before release
-
-5. **Map to OpenAPI**
-   - Ensure OpenAPI documents at least the consumer-required fields
-   - Flag provider fields never consumed (candidates for future deprecation — do not delete yet)
-
-6. **Change process**
-   - Consumer changes contract first (or paired PR)
-   - Provider implements / verifies
-   - No breaking provider change without consumer contract update
+1. **Name consumers** — app/service + owner.  
+2. **Elicit from code** — grep clients for paths, required keys, status branches (not wish lists).  
+3. **Write minimal interactions** — provider state → request → **minimum** response. Prefer existing stack: Pact, Spring Cloud Contract, OpenAPI/schema tests, custom.  
+4. **Provider verification** — CI job, can-i-deploy / merge gate.  
+5. **Align OpenAPI** — spec must cover consumer-required fields; unused fields are deprecation *candidates* only.  
+6. **Process** — consumer updates contract (or paired PR) before provider breaks them.
 
 ## Exit criteria
 
-- [ ] ≥1 consumer interaction documented with request/response minimum
-- [ ] Test approach chosen and file paths proposed
-- [ ] Provider CI verification step described
-- [ ] OpenAPI alignment notes written
-- [ ] Ownership: who updates contracts when clients change
+- [ ] ≥1 interaction with request + min response  
+- [ ] Tooling + file paths proposed  
+- [ ] Provider CI verification described  
+- [ ] OpenAPI gaps listed  
+- [ ] Ownership of contract updates clear  
 
 ## Anti-patterns
 
-- Giant contracts that mirror entire OpenAPI (brittle, not consumer-driven)
-- Contracts only on provider repo with no consumer input
-- Asserting full exact body equality when only a few fields matter
-- Skipping provider states for authenticated/list endpoints
+- Contracts that mirror entire OpenAPI (brittle, not consumer-driven)  
+- Provider-only contracts with no consumer input  
+- Full-body exact equality when three fields matter  
+- Skipping provider states for auth/list flows  
 
 ## Output template
 
@@ -68,14 +52,14 @@ Provider-only OpenAPI is necessary but not sufficient. CDC captures **what consu
 |----|----------|---------|--------------|----------------|
 
 ### Tooling
-- Framework: Pact | OpenAPI tests | other: ...
-- Consumer tests path: ...
-- Provider verify path: ...
-- CI gate: ...
+- Framework: Pact | OpenAPI tests | other: …
+- Consumer tests: …
+- Provider verify: …
+- CI gate: …
 
 ### OpenAPI gaps
-- ...
+- …
 
 ### Process
-- ...
+- …
 ```

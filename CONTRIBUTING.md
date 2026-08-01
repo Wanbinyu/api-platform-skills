@@ -1,37 +1,67 @@
 # Contributing
 
-## Skill quality bar
+Thanks for helping **API Platform Skills** stay sharp and non-duplicative.
 
-Every skill under `skills/<name>/SKILL.md` **must** include:
+## What we accept
 
-1. YAML frontmatter: `name`, `description` (with clear **when to use** triggers)
-2. Overview (1 short paragraph)
-3. Numbered workflow steps
-4. **Exit criteria** (checkbox list — agent is not done until all pass)
-5. Anti-patterns (what agents commonly get wrong)
-6. Output template (fixed Markdown report structure)
-7. Optional `references/` links for progressive disclosure
+| Welcome | Not welcome |
+|---------|-------------|
+| Deeper exit criteria / better templates | Restating REST naming 101 |
+| New **evolution / reliability** skills with unique names | Another `api-design` clone |
+| Golden reports under `examples/sample-reports/` | AI-slop skill dumps (20 thin files) |
+| Install / harness path fixes | Exploit payloads or attack runbooks |
 
-## Naming
+Read [docs/NOT-ANOTHER-API-DESIGN-PACK.md](docs/NOT-ANOTHER-API-DESIGN-PACK.md) before proposing overlap with ECC / Addy / ToB.
 
-- Directory and `name:` field: lowercase kebab-case, match exactly
-- Avoid names already flooded on GitHub (`api-design`, `security-review` alone)
-- Prefer platform verbs: `breaking-change-review`, `deprecation-playbook`
+## Skill file standard
 
-## Before PR
+Every `skills/<kebab-name>/SKILL.md` must have:
 
-```bash
-# Name collision check (optional, needs gh)
-gh search code "name: your-skill-name" --filename SKILL.md --limit 10
+```markdown
+---
+name: kebab-name          # must match folder
+description: >            # include WHEN to use + trigger phrases
+  ...
+---
+
+# Title
+
+## Overview
+## Steps                    # numbered
+## Exit criteria            # checkboxes — required
+## Anti-patterns
+## Output template          # fenced markdown report
 ```
 
-- Do not add skills that only restate REST resource naming (out of scope)
-- Prefer depth + exit criteria over length
-- Update README skill table if adding/removing skills
+Optional: `## References` pointing at `references/*.md`.
 
-## Local install for testing
+### Naming
+
+- Lowercase kebab-case only  
+- Prefer platform verbs: `breaking-change-review`, `deprecation-playbook`  
+- Before opening a PR, check:
 
 ```bash
-./scripts/install.sh --project
-# then invoke the skill in your coding agent inside this repo
+gh search code "name: your-skill-name" --filename SKILL.md --limit 15
 ```
+
+If ≥5 high-quality hits for the same job, **change the angle** or drop it.
+
+## Doc style
+
+- Short paragraphs, scannable tables  
+- Prefer checklists over essays  
+- No filler (“In today’s fast-paced world…”)  
+- ASCII diagrams OK; keep line length reasonable  
+
+## Local check
+
+```powershell
+cd G:\skill\api-platform-skills   # or your clone path
+.\scripts\install.ps1 -Project
+# then run an agent against examples/toy-orders-api
+```
+
+## License
+
+By contributing, you agree your changes are licensed under the repository **MIT** license.

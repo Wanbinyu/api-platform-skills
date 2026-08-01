@@ -1,72 +1,57 @@
 ---
 name: idempotency-and-retries
 description: >
-  Design idempotent APIs and safe retry behavior. Use for create/payment/order
-  endpoints, client timeouts, double-submit, Idempotency-Key headers, or when the
-  user says "/api-idempotent", "retry-safe", or "exactly-once".
+  Design idempotent mutations and safe retry policies. Use for create/payment/order
+  endpoints, client timeouts, double-submit, Idempotency-Key, "/api-idempotent",
+  "retry-safe". Rare in generic API design packs — this is reliability, not resource naming.
 ---
 
 # Idempotency and Retries
 
+> Networks retry. Users double-click. Design for replays.
+
 ## Overview
 
-Networks retry. Users double-click. Clients time out after the server succeeded. Design mutations so **replays do not corrupt state**. True exactly-once is rare; aim for **at-least-once + idempotent handlers**.
+Aim for **at-least-once delivery + idempotent handlers**. Specify keys, storage, conflicts, timeouts, and tests.
 
 ## Steps
 
 1. **Classify operations**
 
-   | Kind | Examples | Idempotency need |
-   |------|----------|------------------|
+   | Kind | Examples | Need |
+   |------|----------|------|
    | Safe read | GET | Natural |
-   | Intrinsic idempotent | PUT full replace, DELETE | Usually by resource key |
-   | Unsafe create | POST payment, POST order | **Requires key or natural key** |
-   | Side-effecting RPC | POST /send-email | Key or dedupe store |
+   | Intrinsic idempotent | PUT replace, DELETE by id | Resource key |
+   | Unsafe create | POST payment/order | **Key or natural key** |
+   | Side-effect RPC | POST send-email | Key / dedupe store |
 
-2. **Choose idempotency mechanism**
-   - Natural key: `PUT /orders/{clientOrderId}`
-   - Header: `Idempotency-Key` (or project standard) on POST
-   - Dedupe table: key → response snapshot / resource id, with TTL
-   - Document conflict behavior: same key + same body → same result; same key + different body → `409` or documented error
+2. **Choose mechanism**  
+   - Natural: `PUT /orders/{clientOrderId}`  
+   - Header: `Idempotency-Key` (or project standard) on POST  
+   - Dedupe row: key → outcome, TTL  
+   - Same key + different body → `409` (recommended) or documented error  
 
-3. **Specify storage semantics**
-   - What is stored: status, response body hash, resource id
-   - TTL and replay window
-   - Concurrency: first writer wins; lock or unique constraint
-
-4. **Timeouts and retries (client + server + dependency)**
-   - Timeouts must be **shorter upstream than downstream** (avoid retry storms)
-   - Retry only idempotent or keyed operations
-   - Backoff + jitter; cap attempts
-   - Propagate correlation/trace ids
-
-5. **Failure modes to design explicitly**
-   - Server committed, response lost
-   - Partial downstream success (payment ok, DB fail) — saga/compensation note
-   - Key reuse with different payload
-
-6. **Tests**
-   - Double POST same key → one resource
-   - Parallel double POST → one resource
-   - Different body same key → conflict
-   - After TTL → define behavior
+3. **Storage semantics** — body hash, status, resource id, TTL, uniqueness/lock.  
+4. **Retry policy** — upstream timeouts **shorter** than downstream; backoff + jitter; never blind-retry unkeyed POST; propagate trace ids.  
+5. **Failure modes** — response lost after commit · partial downstream success · key reuse mismatch.  
+6. **Tests** — sequential double POST · concurrent double · body mismatch · post-TTL behavior.
 
 ## Exit criteria
 
-- [ ] Each in-scope mutation classified
-- [ ] Mechanism chosen and documented (header name / natural key)
-- [ ] Storage + TTL + conflict semantics specified
-- [ ] Retry policy for clients and workers specified
-- [ ] Test cases listed
-- [ ] OpenAPI/docs note for clients added to checklist
+- [ ] Mutations classified  
+- [ ] Mechanism named (header / natural key)  
+- [ ] Storage + TTL + conflict defined  
+- [ ] Client/worker retry policy written  
+- [ ] Test list present  
+- [ ] Docs/OpenAPI note on checklist  
 
 ## Anti-patterns
 
-- "Just retry POST" without keys
-- Idempotency key accepted but not stored (theater)
-- Infinite retries on non-idempotent calls
-- Same timeout on every hop
-- Returning different bodies for the same key on replay
+- “Just retry POST” without keys  
+- Accepting keys but not persisting them  
+- Infinite retries on non-idempotent calls  
+- Identical timeouts on every hop  
+- Different bodies returned for the same key  
 
 ## Output template
 
@@ -78,20 +63,19 @@ Networks retry. Users double-click. Clients time out after the server succeeded.
 |-----------|-------|-----------|----------|-----|
 
 ### Storage
-- Store: ...
-- Uniqueness: ...
+- …
 
 ### Retry policy
-- Client: ...
-- Worker: ...
-- Do not retry: ...
+- Client: …
+- Worker: …
+- Do not retry: …
 
 ### Tests
-- [ ] ...
+- [ ] …
 
 ### Docs
-- Header/param: ...
-- Example: ...
+- Header/param: …
+- Example: …
 ```
 
 ## References

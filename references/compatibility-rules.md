@@ -1,37 +1,39 @@
-# Compatibility rules (quick reference)
+# Compatibility rules
 
-Use with `breaking-change-review` and `compatibility-matrix`.
+Quick reference for `breaking-change-review` and `compatibility-matrix`.
 
-## Additive (usually safe)
+## Usually safe (additive)
 
-- New endpoint
-- New optional response property
-- New optional request property (server defaults if absent)
-- New enum **value** if clients tolerate unknown enums
-- New error code for new failure modes (document it)
+| Change | Notes |
+|--------|--------|
+| New endpoint | — |
+| New optional response property | — |
+| New optional request property | Server must default if absent |
+| New enum **value** | Clients should tolerate unknowns |
+| New error code for a new failure | Document it |
 
-## Breaking (usually unsafe for shipped APIs)
+## Usually breaking (shipped APIs)
 
-- Remove/rename path, method, or property
-- Change property type or make optional field required
-- Remove enum value
-- Change auth requirements incompatibly
-- Change status codes clients depend on
-- Semantic change with same schema
-- Tighten validation rejecting old clients
+| Change | Notes |
+|--------|--------|
+| Remove/rename path, method, property | — |
+| Type change / optional → required | — |
+| Remove enum value | — |
+| Incompatible auth change | — |
+| Status codes clients branch on | — |
+| Semantic change, same schema | e.g. unit change |
+| Tighter validation | Rejects old clients |
+| Cursor / pagination format change | — |
 
-## Gray areas (flag explicitly)
+## Gray area (always flag)
 
-- Reordering JSON properties (almost always OK)
-- Changing undocumented behavior
-- Default page size changes
-- Adding stricter rate limits (product/comms issue)
-- Error message text changes (if clients parse text — discourage parsing)
+- Changing undocumented behavior  
+- Default page size that truncates results  
+- Stricter rate limits (product/comms)  
+- Error **message text** if clients parse strings (discourage parsing)
 
-## Decision heuristic
+## Heuristic
 
-1. Is the API shipped to any consumer outside this PR's deploy unit?  
-   - No → mark unreleased; still document.  
-   - Yes → apply breaking rules strictly.
-2. Can we add instead of change? Prefer add + deprecate.
-3. If we must break → new version + migration note + timeline.
+1. Consumed outside this deploy unit? → apply breaking rules strictly.  
+2. Can we **add** instead of change? Prefer add + deprecate.  
+3. Must break? → new version + migration + timeline.

@@ -1,74 +1,54 @@
 ---
 name: deprecation-playbook
 description: >
-  Plan and execute API deprecation without surprising consumers. Use when sunsetting
-  endpoints or fields, migrating from v1 to v2, dual-running versions, or when the user
-  says "/api-deprecate", "sunset", "deprecation plan".
+  Dated API deprecation plan with dual-track and consumer communication. Use when
+  sunsetting endpoints/fields, migrating v1→v2, or "/api-deprecate", "sunset",
+  "deprecation plan". Not a delete PR checklist — communication + measurement + rollback.
 ---
 
 # Deprecation Playbook
 
+> Deprecation is a release train, not a red delete button.
+
 ## Overview
 
-Deprecation is a **communication + dual-track + measurement** problem, not a delete PR. This skill produces a dated plan with signals (headers, docs, metrics) and a hard sunset criteria.
+Deliver a **dated plan**: measure usage → choose strategy → signals (headers/docs) → consumer checklist → rollback.
 
 ## Steps
 
-1. **Define what is deprecated**
-   - Endpoints, fields, auth modes, base URLs.
-   - Replacement contract (links to new operationIds / version).
-
-2. **Measure current usage** (or document how to)
-   - Logs/metrics: request counts by path, user/agent, partner id.
-   - If no metrics: treat as **high risk**; require longer window or forced inventory.
-
-3. **Choose strategy**
+1. **Name the surface** — what dies, what replaces it (operationIds / version links).  
+2. **Measure or escalate risk** — path counts, partner ids, user-agents. No metrics ⇒ **high risk**, longer window or forced inventory.  
+3. **Pick a strategy**
 
    | Strategy | When |
    |----------|------|
-   | Additive dual-track | Default for public APIs |
-   | Header-only warning | Low traffic internal |
-   | Big-bang cutover | Single consumer, coordinated deploy only |
-   | Emulation adapter | Old shape served from new internals |
+   | Additive dual-track | Default public APIs |
+   | Header warnings only | Low-traffic internal |
+   | Big-bang cutover | Single consumer, same deploy train |
+   | Emulation adapter | Old shape over new internals |
 
-4. **Timeline**
-   - Announce date
-   - Soft deprecation (warnings)
-   - Default switch (if any)
-   - Hard sunset (fail closed)
-   - Minimum windows (suggested defaults — adjust for audience):
-     - Internal single-team: days–2 weeks
-     - Multi-team internal: 30+ days
-     - Public/partner: 90+ days or contractual
-
-5. **Signals to implement**
-   - `Deprecation` / `Sunset` headers (RFC 8594 style where applicable)
-   - Warning in response body or docs portal
-   - Changelog + migration guide
-   - Optional: sunset date in error body after deadline
-
-6. **Consumer checklist**
-   - Per known consumer: contact, migration task, done criteria.
-
-7. **Rollback**
-   - How to re-enable old path if sunset fails.
+4. **Timeline** — announce · soft (warnings) · optional default switch · hard sunset.  
+   Suggested floors (adjust for audience): internal single-team days–2w · multi-team 30d+ · public/partner 90d+ or contract.  
+5. **Signals** — `Deprecation` / `Sunset` headers · portal/changelog · migration guide · post-deadline error body optional.  
+6. **Per-consumer checklist** — owner, task, done criteria.  
+7. **Rollback** — how to re-enable the old path.
 
 ## Exit criteria
 
-- [ ] Deprecated surface + replacement listed
-- [ ] Usage measurement plan or explicit high-risk waiver
-- [ ] Strategy chosen with rationale
-- [ ] Dated timeline with announce / soft / hard milestones
-- [ ] Header/docs/changelog signals specified
-- [ ] Consumer checklist (or unknown-consumer risk accepted in writing)
-- [ ] Rollback path documented
+- [ ] Deprecated surface + replacement listed  
+- [ ] Usage plan or high-risk waiver  
+- [ ] Strategy + rationale  
+- [ ] Dated milestones  
+- [ ] Headers/docs/changelog tasks listed  
+- [ ] Consumers or accepted unknown risk  
+- [ ] Rollback path  
 
 ## Anti-patterns
 
-- Deleting endpoints in the same PR as "deprecation"
-- No sunset date ("someday")
-- No metrics and short window for public APIs
-- Silent dual-write without documenting which source of truth wins
+- Delete and “deprecate” in the same PR  
+- Sunset date = “someday”  
+- Public API + no metrics + short window  
+- Silent dual-write with unclear source of truth  
 
 ## Output template
 
@@ -76,34 +56,34 @@ Deprecation is a **communication + dual-track + measurement** problem, not a del
 ## Deprecation plan
 
 ### Surface
-- Deprecated: ...
-- Replacement: ...
+- Deprecated: …
+- Replacement: …
 
 ### Usage
-- Current traffic: ... | unknown (risk: high)
-- How measured: ...
+- Traffic: … | unknown (risk: high)
+- Measured by: …
 
 ### Strategy
-- ...
+- …
 
 ### Timeline
 | milestone | date | criteria |
 |-----------|------|----------|
 | Announce | | |
 | Soft deprecation | | headers live |
-| Hard sunset | | old path returns ... |
+| Hard sunset | | old path returns … |
 
-### Engineering tasks
+### Engineering
 - [ ] Headers
-- [ ] Docs/changelog
-- [ ] Metrics dashboard
-- [ ] Adapter/dual-track code
-- [ ] Sunset fail-closed behavior
+- [ ] Docs / changelog
+- [ ] Metrics
+- [ ] Dual-track / adapter
+- [ ] Fail-closed sunset behavior
 
 ### Consumers
 | consumer | contact | status |
 |----------|---------|--------|
 
 ### Rollback
-- ...
+- …
 ```
