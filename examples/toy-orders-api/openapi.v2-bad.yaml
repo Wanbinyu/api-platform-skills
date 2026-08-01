@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: Toy Orders API
+  version: 2.0.0
+  description: >
+    DELIBERATELY BAD revision for demos. Contains silent breaking changes.
+    Do not ship. Use with breaking-change-review skill.
+servers:
+  - url: https://api.example.com/v1
+paths:
+  /orders:
+    get:
+      operationId: listOrders
+      summary: List orders for the current user
+      # BREAKING: auth removed
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderList"
+    post:
+      operationId: createOrder
+      summary: Create an order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+      responses:
+        # BREAKING: 201 -> 200 for create
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      summary: Get order by id
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    BadRequest:
+      description: Bad request
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: Not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    Problem:
+      type: object
+      required: [title, status]
+      properties:
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        type:
+          type: string
+          format: uri
+    CreateOrderRequest:
+      type: object
+      # BREAKING: items still required but note is now required
+      required: [items, note]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/OrderItemInput"
+        note:
+          type: string
+          maxLength: 500
+    OrderItemInput:
+      type: object
+      required: [sku, quantity]
+      properties:
+        sku:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+    OrderList:
+      type: object
+      required: [data, next_cursor]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        next_cursor:
+          type: string
+          nullable: true
+    Order:
+      type: object
+      # BREAKING: total_cents removed; amount (float dollars) added
+      # BREAKING: status is now enum with different values
+      # BREAKING: customer_email removed (and/or was sensitive)
+      required: [id, status, amount, currency, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [OPEN, COMPLETE, VOID]
+        amount:
+          type: number
+          description: Total in major currency units (DOLLARS) — semantic break vs total_cents
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+        # note removed — BREAKING
+        created_at:
+          type: string
+          format: date-time
+        internal_score:
+          type: number
+          description: Leak risk — internal ranking field exposed
