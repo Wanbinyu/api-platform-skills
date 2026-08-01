@@ -283,3 +283,13 @@ If a skill can’t fail a checklist, it doesn’t ship. See [CONTRIBUTING.md](CO
 ```text
 MIT · open source · https://github.com/Wanbinyu/api-platform-skills
 ```
+
+---
+
+## One skill = one project (optional)
+
+Prefer installing a **single skill**? Each skill is also exported as a standalone project under `G:\skill\solo\<name>` and can be published as `skill-<name>` on GitHub.
+
+- Local catalog: `G:\skill\solo\CATALOG.md` / `G:\skill\SOLO-MODEL.md`
+- Bulk install: this collection repo (all skills at once)
+
