@@ -21,8 +21,15 @@
   <a href="#skills">Skills</a> ·
   <a href="#30-second-demo">Demo</a> ·
   <a href="#why-this-exists">Why this</a> ·
-  <a href="docs/NOT-ANOTHER-API-DESIGN-PACK.md">vs others</a>
+  <a href="docs/NOT-ANOTHER-API-DESIGN-PACK.md">vs others</a> ·
+  <a href="docs/SOCIAL.md">share copy</a>
 </p>
+
+<p align="center">
+  <img src="assets/demo-breaking-change.gif" alt="Demo: breaking-change-review blocks a bad OpenAPI upgrade" width="800" />
+</p>
+
+<p align="center"><sub>Demo: agent loads <code>breaking-change-review</code> on a bad v1→v2 OpenAPI diff → <strong>MERGE BLOCKED</strong></sub></p>
 
 ---
 
@@ -157,6 +164,10 @@ Optional command stubs live in [`commands/`](commands/) for harnesses that suppo
 
 ## 30-second demo
 
+<p align="center">
+  <img src="assets/demo-poster.png" alt="MERGE BLOCKED verdict poster" width="720" />
+</p>
+
 Repo includes a **deliberately bad** upgrade:
 
 | File | Role |
@@ -164,6 +175,7 @@ Repo includes a **deliberately bad** upgrade:
 | [`examples/toy-orders-api/openapi.v1.yaml`](examples/toy-orders-api/openapi.v1.yaml) | Shipped baseline |
 | [`examples/toy-orders-api/openapi.v2-bad.yaml`](examples/toy-orders-api/openapi.v2-bad.yaml) | Silent breaks on purpose |
 | [`examples/sample-reports/breaking-change-v1-vs-v2-bad.md`](examples/sample-reports/breaking-change-v1-vs-v2-bad.md) | Golden report |
+| [`assets/demo-breaking-change.gif`](assets/demo-breaking-change.gif) | Animated walkthrough |
 
 After install, ask your agent:
 
@@ -174,6 +186,10 @@ Give a merge verdict. Diff against the golden sample report.
 ```
 
 A good run flags auth removal, `201→200`, required-field tighten, cents→dollars semantic break, status enum rewrite, deleted fields, and oversharing `internal_score` — then **request-changes**.
+
+### Share / star
+
+Ready-to-post copy (EN + 中文): **[docs/SOCIAL.md](docs/SOCIAL.md)**
 
 ---
 

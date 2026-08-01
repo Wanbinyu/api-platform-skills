@@ -17,9 +17,9 @@
 | Priority | Task |
 |----------|------|
 | 1 | Self-test `breaking-change-review` on the toy API |
-| 2 | Record a short demo GIF for README |
-| 3 | GitHub topics: `agent-skills`, `claude-code`, `openapi`, `codex`, `api` |
-| 4 | Tag `v0.1.0` and share the link |
+| 2 | ~~Demo GIF~~ — `assets/demo-breaking-change.gif` |
+| 3 | ~~Topics~~ — set on GitHub |
+| 4 | Share using [docs/SOCIAL.md](docs/SOCIAL.md); tag `v0.1.0` |
 
 ## Freeze (v0.1)
 
