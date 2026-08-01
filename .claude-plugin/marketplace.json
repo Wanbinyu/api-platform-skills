@@ -1,0 +1,27 @@
+{
+  "name": "api-platform-skills",
+  "owner": {
+    "name": "Wanbinyu",
+    "url": "https://github.com/Wanbinyu"
+  },
+  "metadata": {
+    "description": "Claude Code marketplace for API Platform Skills — contract evolution, not REST naming tutorials.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "api-platform-skills",
+      "source": "./",
+      "version": "0.1.0",
+      "description": "Nine skills for API contract evolution: OpenAPI gates, breaking-change review, deprecation, CDC, idempotency, webhooks, secure API surface.",
+      "keywords": [
+        "api",
+        "openapi",
+        "claude-code",
+        "agent-skills",
+        "breaking-change",
+        "idempotency"
+      ]
+    }
+  ]
+}

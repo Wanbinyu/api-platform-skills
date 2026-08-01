@@ -90,5 +90,5 @@ Classify every contract delta, demand migration notes for breaks, emit **approve
 
 ## References
 
-- `references/compatibility-rules.md`  
+- [compatibility-rules.md](references/compatibility-rules.md)  
 - Next: `deprecation-playbook` when removing after a window  

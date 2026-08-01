@@ -80,4 +80,4 @@ Aim for **at-least-once delivery + idempotent handlers**. Specify keys, storage,
 
 ## References
 
-- `references/idempotency-patterns.md`
+- [idempotency-patterns.md](references/idempotency-patterns.md)

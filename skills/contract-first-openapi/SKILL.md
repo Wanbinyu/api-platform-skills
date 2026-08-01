@@ -94,5 +94,5 @@ Produce a **minimal-but-complete** contract review and an implementation checkli
 
 ## References
 
-- `references/compatibility-rules.md` — what becomes a break later  
+- [compatibility-rules.md](references/compatibility-rules.md) — what becomes a break later  
 - Pair with `breaking-change-review` when editing a shipped spec  

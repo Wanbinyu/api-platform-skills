@@ -80,3 +80,7 @@ Map **what changes → who consumes it → severity → mitigation**. Document u
 - Recommendation: ship-additive | version-bump | block | research
 - Rationale: …
 ```
+
+## References
+
+- [compatibility-rules.md](references/compatibility-rules.md)

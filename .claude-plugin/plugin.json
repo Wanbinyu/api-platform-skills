@@ -1,0 +1,21 @@
+{
+  "name": "api-platform-skills",
+  "version": "0.1.0",
+  "description": "Agent skills for API contract evolution: breaking-change review, compatibility matrices, deprecation, CDC, idempotency, webhooks, and product API surface security. Not another REST naming pack.",
+  "author": {
+    "name": "Wanbinyu",
+    "url": "https://github.com/Wanbinyu"
+  },
+  "homepage": "https://github.com/Wanbinyu/api-platform-skills",
+  "repository": "https://github.com/Wanbinyu/api-platform-skills",
+  "license": "MIT",
+  "keywords": [
+    "api",
+    "openapi",
+    "breaking-change",
+    "idempotency",
+    "webhooks",
+    "contract",
+    "skills"
+  ]
+}

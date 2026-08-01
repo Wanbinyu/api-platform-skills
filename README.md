@@ -87,26 +87,51 @@ They compose. They don’t compete. Details: **[docs/NOT-ANOTHER-API-DESIGN-PACK
 
 ## Install
 
-### Windows (PowerShell)
+### Claude Code（推荐，直接进 Skills）
+
+Skills 已是标准 **`SKILL.md`**，装进 Claude 后可自动按描述触发。
+
+**一键装到本机 Claude（全局）：**
 
 ```powershell
+# Windows
 git clone https://github.com/Wanbinyu/api-platform-skills.git
 cd api-platform-skills
-.\scripts\install.ps1            # user-level (~/.claude, ~/.agents, …)
-# .\scripts\install.ps1 -Project # this repo only
+.\scripts\install.ps1 -Claude
+# 默认不带参数也是装 Claude：.\scripts\install.ps1
 ```
 
-### macOS / Linux
-
 ```bash
+# macOS / Linux
 git clone https://github.com/Wanbinyu/api-platform-skills.git
 cd api-platform-skills
 chmod +x scripts/install.sh
-./scripts/install.sh             # user-level
-# ./scripts/install.sh --project # this repo only
+./scripts/install.sh --claude
 ```
 
-### Where skills land
+写入：`~/.claude/skills/<name>/SKILL.md` → **重启 Claude Code 会话**。
+
+**Claude Code Plugin / Marketplace：**
+
+```text
+/plugin marketplace add Wanbinyu/api-platform-skills
+/plugin install api-platform-skills@api-platform-skills
+/reload-plugins
+```
+
+**当前项目 only：**
+
+```powershell
+.\scripts\install.ps1 -Project   # → .claude/skills/ 等
+```
+
+完整说明（验证、排错、网页版）：**[docs/CLAUDE.md](docs/CLAUDE.md)**
+
+### 其他 Agent
+
+```powershell
+.\scripts\install.ps1 -All       # Claude + Codex(~/.agents) + Cursor
+```
 
 | Agent | Directory |
 |-------|-----------|
