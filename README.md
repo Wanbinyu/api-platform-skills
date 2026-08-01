@@ -33,6 +33,17 @@
 
 ---
 
+## Sister pack
+
+| Pack | Surface |
+|------|---------|
+| **api-platform-skills** (this) | HTTP / OpenAPI for humans & SDKs |
+| [ai-surface-skills](https://github.com/Wanbinyu/ai-surface-skills) | Tools / MCP for **agents** |
+
+Compose both: evolve HTTP with this pack; evolve agent tool contracts with ai-surface-skills.
+
+---
+
 ## What you get
 
 Install once. Your agent learns **ten workflows** for the hard part of HTTP APIs:
