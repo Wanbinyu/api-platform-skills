@@ -1,5 +1,8 @@
 # API Platform Skills
 
+**English** | [中文](README.zh-CN.md)
+
+
 <p align="center">
   <strong>Design is easy. Evolution is hard.</strong>
 </p>
