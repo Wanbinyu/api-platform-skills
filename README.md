@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/Wanbinyu/api-platform-skills/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
   <a href="https://github.com/agentskills/agentskills"><img src="https://img.shields.io/badge/format-Agent%20Skills-111827" alt="Agent Skills" /></a>
-  <a href="https://github.com/Wanbinyu/api-platform-skills/releases"><img src="https://img.shields.io/badge/version-0.1.1-0ea5e9" alt="v0.1.1" /></a>
+  <a href="https://github.com/Wanbinyu/api-platform-skills/releases"><img src="https://img.shields.io/badge/version-0.1.2-0ea5e9" alt="v0.1.2" /></a>
   <img src="https://img.shields.io/badge/Claude-Codex-Cursor-Gemini-Copilot-7c3aed" alt="Multi harness" />
 </p>
 
@@ -193,24 +193,36 @@ Optional command stubs live in [`commands/`](commands/) for harnesses that suppo
   <img src="assets/demo-poster.png" alt="MERGE BLOCKED verdict poster" width="720" />
 </p>
 
-Repo includes a **deliberately bad** upgrade:
+### Fixtures
 
-| File | Role |
-|------|------|
-| [`examples/toy-orders-api/openapi.v1.yaml`](examples/toy-orders-api/openapi.v1.yaml) | Shipped baseline |
-| [`examples/toy-orders-api/openapi.v2-bad.yaml`](examples/toy-orders-api/openapi.v2-bad.yaml) | Silent breaks on purpose |
-| [`examples/sample-reports/breaking-change-v1-vs-v2-bad.md`](examples/sample-reports/breaking-change-v1-vs-v2-bad.md) | Golden report |
-| [`assets/demo-breaking-change.gif`](assets/demo-breaking-change.gif) | Animated walkthrough |
+| Scenario | Files | Expected |
+|----------|-------|----------|
+| Orders (classic break demo) | [`examples/toy-orders-api/`](examples/toy-orders-api/) | **request-changes** |
+| Billing safe additive | [`examples/billing-api/`](examples/billing-api/) `v1` → `v1.1-safe` | **approve** |
+| Billing risky cleanup | `v1` → `v2-risky` | **request-changes** |
 
-After install, ask your agent:
+Golden reports live under [`examples/sample-reports/`](examples/sample-reports/).
+
+### Machine assist (OpenAPI diff)
+
+```bash
+# from repo root — structural deltas for the agent
+python scripts/openapi_breaking_diff.py \
+  examples/billing-api/openapi.v1.yaml \
+  examples/billing-api/openapi.v2-risky.yaml
+
+# exit 0 = no hard breaks; exit 2 = hard/semantic breaks found
+```
+
+Agent still owns migration notes and final merge verdict (`breaking-change-review`).
+
+### Prompt
 
 ```text
 Compare examples/toy-orders-api/openapi.v1.yaml with openapi.v2-bad.yaml.
-Follow skills/breaking-change-review/SKILL.md exactly.
-Give a merge verdict. Diff against the golden sample report.
+Optionally run scripts/openapi_breaking_diff.py first.
+Follow skills/breaking-change-review/SKILL.md. Merge verdict required.
 ```
-
-A good run flags auth removal, `201→200`, required-field tighten, cents→dollars semantic break, status enum rewrite, deleted fields, and oversharing `internal_score` — then **request-changes**.
 
 ### Share / star
 
@@ -238,7 +250,8 @@ If a skill can’t fail a checklist, it doesn’t ship. See [CONTRIBUTING.md](CO
 |---------|--------|
 | **0.1** | Nine skills · toy OpenAPI · installers · golden report |
 | **0.1.1** | Claude-native install · bilingual triggers · skill validator CI |
-| **0.2** | More sample reports · optional OpenAPI diff helper |
+| **0.1.2** | Billing fixtures · sample reports · `openapi_breaking_diff.py` |
+| **0.2** | More real-world samples · eval harness |
 | **0.3** | Lightweight eval fixtures (agent with/without skill) |
 | **0.4** | Optional gRPC / GraphQL evolution add-ons |
 

@@ -40,12 +40,21 @@ Classify every contract delta, demand migration notes for breaks, emit
 
 ## Steps
 
-1. **Before / after** - OpenAPI diff, or reconstruct public shapes from code.
-2. **Atomic deltas** - one row per change.
-3. **Classify** - `non-breaking | breaking | semantic-breaking | unclear`.
-4. **For each break** - migration note + version strategy, or written waiver (internal-only / multi-repo same day).
-5. **Docs and SDK** - changelog? regenerate clients?
-6. **Verdict** - see template.
+1. **Before / after** - OpenAPI files, or reconstruct public shapes from code.
+2. **Optional machine assist** (when both sides are OpenAPI 3.x YAML/JSON):
+
+   ```bash
+   python scripts/openapi_breaking_diff.py old.yaml new.yaml
+   # exit 0 = no hard breaks detected; exit 2 = hard/semantic breaks
+   python scripts/openapi_breaking_diff.py old.yaml new.yaml --format json
+   ```
+
+   Treat tool output as a **draft delta list**, not the final verdict. Confirm false positives (complex `oneOf`/`allOf`, external `$ref`).
+3. **Atomic deltas** - one row per change (merge tool + human findings).
+4. **Classify** - `non-breaking | breaking | semantic-breaking | unclear`.
+5. **For each break** - migration note + version strategy, or written waiver (internal-only / multi-repo same day).
+6. **Docs and SDK** - changelog? regenerate clients?
+7. **Verdict** - see template.
 
 ## Exit criteria
 
@@ -93,4 +102,6 @@ Classify every contract delta, demand migration notes for breaks, emit
 ## References
 
 - [compatibility-rules.md](references/compatibility-rules.md)
+- Repo tool: `scripts/openapi_breaking_diff.py`
+- Fixtures: `examples/toy-orders-api/`, `examples/billing-api/`
 - Next: `deprecation-playbook` when removing after a window

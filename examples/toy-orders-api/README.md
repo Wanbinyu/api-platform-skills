@@ -8,6 +8,14 @@ Deliberate teaching fixture for **API Platform Skills**.
 | [`openapi.v2-bad.yaml`](openapi.v2-bad.yaml) | Upgrade full of **silent breaks** |
 | [../sample-reports/breaking-change-v1-vs-v2-bad.md](../sample-reports/breaking-change-v1-vs-v2-bad.md) | Golden review |
 
+```bash
+python scripts/openapi_breaking_diff.py \
+  examples/toy-orders-api/openapi.v1.yaml \
+  examples/toy-orders-api/openapi.v2-bad.yaml
+```
+
+Also see [`../billing-api/`](../billing-api/) for a money/idempotency-oriented fixture pair.
+
 ## Try these prompts
 
 **Breaking change**
