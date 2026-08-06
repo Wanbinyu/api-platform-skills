@@ -99,7 +99,7 @@ python scripts/openapi_breaking_diff.py \
 | All harnesses | `.\scripts\install.ps1 -All` |
 | This project only | `.\scripts\install.ps1 -Project` |
 | Plugin | `/plugin marketplace add Wanbinyu/api-platform-skills` then install plugin |
-| **One skill only** | e.g. https://github.com/Wanbinyu/skill-breaking-change-review |
+| **One skill only** | Install the collection, then copy or link the needed `skills/<name>` directory |
 
 macOS/Linux: `./scripts/install.sh --claude`
 
@@ -112,7 +112,9 @@ macOS/Linux: `./scripts/install.sh --claude`
 | **This** | HTTP / OpenAPI → humans & SDKs |
 | [ai-surface-skills](https://github.com/Wanbinyu/ai-surface-skills) | Tool / MCP → **agents** |
 
-19 standalone skill repos: https://github.com/Wanbinyu?tab=repositories&q=skill-
+The former standalone `skill-*` repositories are archived historical links for URL compatibility. New work and new installs should use this collection.
+
+This repository is the canonical source for the 10 skills listed above.
 
 ---
 
