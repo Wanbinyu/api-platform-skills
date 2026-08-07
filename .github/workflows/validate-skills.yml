@@ -1,23 +1,52 @@
-name: validate-skills
+name: validate-api-platform
 
 on:
   push:
     paths:
       - "skills/**"
-      - "scripts/validate_skills.py"
+      - "commands/**"
+      - "examples/**"
+      - "scripts/**"
+      - "tests/**"
+      - ".claude-plugin/**"
+      - "README*.md"
       - ".github/workflows/validate-skills.yml"
   pull_request:
     paths:
       - "skills/**"
-      - "scripts/validate_skills.py"
+      - "commands/**"
+      - "examples/**"
+      - "scripts/**"
+      - "tests/**"
+      - ".claude-plugin/**"
+      - "README*.md"
+      - ".github/workflows/validate-skills.yml"
+
+permissions:
+  contents: read
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    name: Validate (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Validate SKILL.md structure
+      - name: Install diff tool dependency
+        run: python -m pip install --disable-pip-version-check "PyYAML>=6.0,<7"
+      - name: Validate skills, commands, and plugin metadata
         run: python scripts/validate_skills.py
+      - name: Run OpenAPI diff regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Run installer smoke test
+        run: python scripts/smoke_install.py
+      - name: Check Bash installer syntax
+        if: runner.os == 'Linux'
+        run: bash -n scripts/install.sh

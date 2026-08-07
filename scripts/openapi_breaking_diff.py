@@ -22,7 +22,7 @@ import json
 import sys
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 try:
     import yaml
@@ -71,31 +71,42 @@ def resolve_ref(root: dict[str, Any], node: Any, stack: tuple[str, ...] = ()) ->
     return out
 
 
-def schema_props(schema: Any) -> dict[str, Any]:
+def schema_props(schema: Any, root: dict[str, Any] | None = None) -> dict[str, Any]:
     if not isinstance(schema, dict):
         return {}
-    if schema.get("type") == "object" or "properties" in schema:
-        return dict(schema.get("properties") or {})
-    # allOf: shallow merge properties
+    if root is not None and "$ref" in schema:
+        schema = resolve_ref(root, schema)
+        if not isinstance(schema, dict):
+            return {}
+    # Merge allOf and inline properties. A schema can legally declare both
+    # `type: object` and `allOf`; returning early would hide inherited fields.
     props: dict[str, Any] = {}
     for part in schema.get("allOf") or []:
-        props.update(schema_props(part))
+        props.update(schema_props(part, root))
     props.update(dict(schema.get("properties") or {}))
     return props
 
 
-def schema_required(schema: Any) -> set[str]:
+def schema_required(schema: Any, root: dict[str, Any] | None = None) -> set[str]:
     if not isinstance(schema, dict):
         return set()
+    if root is not None and "$ref" in schema:
+        schema = resolve_ref(root, schema)
+        if not isinstance(schema, dict):
+            return set()
     req = set(schema.get("required") or [])
     for part in schema.get("allOf") or []:
-        req |= schema_required(part)
+        req |= schema_required(part, root)
     return req
 
 
-def schema_type(schema: Any) -> str:
+def schema_type(schema: Any, root: dict[str, Any] | None = None) -> str:
     if not isinstance(schema, dict):
         return type(schema).__name__
+    if root is not None and "$ref" in schema:
+        schema = resolve_ref(root, schema)
+        if not isinstance(schema, dict):
+            return type(schema).__name__
     if "$ref" in schema:
         return f"ref:{schema['$ref']}"
     t = schema.get("type")
@@ -108,6 +119,8 @@ def schema_type(schema: Any) -> str:
         bits.append(f"fmt:{fmt}")
     if enum is not None:
         bits.append("enum")
+    if schema.get("nullable") is True:
+        bits.append("nullable")
     return "/".join(bits)
 
 
@@ -122,7 +135,9 @@ def json_pointer_escape(s: str) -> str:
 HTTP_METHODS = {"get", "put", "post", "delete", "options", "head", "patch", "trace"}
 
 
-def iter_operations(spec: dict[str, Any]):
+def iter_operations(
+    spec: dict[str, Any],
+) -> Iterator[tuple[str, str, dict[str, Any], dict[str, Any]]]:
     paths = spec.get("paths") or {}
     if not isinstance(paths, dict):
         return
@@ -130,9 +145,9 @@ def iter_operations(spec: dict[str, Any]):
         if not isinstance(item, dict):
             continue
         for method, op in item.items():
-            if method.lower() not in HTTP_METHODS or not isinstance(op, dict):
+            if not isinstance(method, str) or method.lower() not in HTTP_METHODS or not isinstance(op, dict):
                 continue
-            yield path, method.lower(), op
+            yield path, method.lower(), op, item
 
 
 def op_security(spec: dict[str, Any], op: dict[str, Any]) -> list[Any]:
@@ -155,6 +170,27 @@ def request_schema(root: dict[str, Any], op: dict[str, Any]) -> Any:
         if isinstance(media, dict) and "schema" in media:
             return resolve_ref(root, media.get("schema"))
     return None
+
+
+def request_body(root: dict[str, Any], op: dict[str, Any]) -> dict[str, Any] | None:
+    raw = op.get("requestBody")
+    if raw is None:
+        return None
+    resolved = resolve_ref(root, raw)
+    return resolved if isinstance(resolved, dict) else None
+
+
+def body_content(root: dict[str, Any], body: dict[str, Any]) -> dict[str, Any]:
+    content = body.get("content") or {}
+    if not isinstance(content, dict):
+        return {}
+    out: dict[str, Any] = {}
+    for media_type, media in content.items():
+        if not isinstance(media, dict):
+            continue
+        schema = media.get("schema")
+        out[str(media_type)] = resolve_ref(root, schema) if schema is not None else None
+    return out
 
 
 def response_schemas(root: dict[str, Any], op: dict[str, Any]) -> dict[str, Any]:
@@ -215,8 +251,14 @@ def compare_schemas(
     loc: str,
     *,
     side: str,
+    old_root: dict[str, Any] | None = None,
+    new_root: dict[str, Any] | None = None,
 ) -> None:
     """side: request | response"""
+    if old_root is not None and isinstance(old_s, dict) and "$ref" in old_s:
+        old_s = resolve_ref(old_root, old_s)
+    if new_root is not None and isinstance(new_s, dict) and "$ref" in new_s:
+        new_s = resolve_ref(new_root, new_s)
     if old_s is None and new_s is None:
         return
     if old_s is not None and new_s is None:
@@ -239,7 +281,7 @@ def compare_schemas(
         )
         return
 
-    old_t, new_t = schema_type(old_s), schema_type(new_s)
+    old_t, new_t = schema_type(old_s, old_root), schema_type(new_s, new_root)
     if old_t != new_t and "ref:" not in old_t and "ref:" not in new_t:
         # money/unit smell
         cls = "semantic-breaking" if {"integer", "number"} & {old_t.split("/")[0], new_t.split("/")[0]} else "breaking"
@@ -260,10 +302,12 @@ def compare_schemas(
                 new_s.get("items") if isinstance(new_s, dict) else None,
                 f"{loc}[]",
                 side=side,
+                old_root=old_root,
+                new_root=new_root,
             )
 
-    old_props, new_props = schema_props(old_s), schema_props(new_s)
-    old_req, new_req = schema_required(old_s), schema_required(new_s)
+    old_props, new_props = schema_props(old_s, old_root), schema_props(new_s, new_root)
+    old_req, new_req = schema_required(old_s, old_root), schema_required(new_s, new_root)
 
     for name in sorted(set(old_props) - set(new_props)):
         add_delta(
@@ -298,6 +342,8 @@ def compare_schemas(
             new_props[name],
             f"{loc}.{name}",
             side=side,
+            old_root=old_root,
+            new_root=new_root,
         )
         # enum shrink
         oe = (old_props[name] or {}).get("enum") if isinstance(old_props[name], dict) else None
@@ -354,20 +400,30 @@ def param_key(param: dict[str, Any]) -> tuple[str, str]:
     return (str(param.get("in") or "query"), str(param.get("name") or ""))
 
 
-def normalize_params(root: dict[str, Any], op: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
+def normalize_params(
+    root: dict[str, Any],
+    path_item: dict[str, Any],
+    op: dict[str, Any],
+) -> dict[tuple[str, str], dict[str, Any]]:
     out: dict[tuple[str, str], dict[str, Any]] = {}
-    for raw in op.get("parameters") or []:
-        p = resolve_ref(root, raw)
-        if not isinstance(p, dict):
+    # Operation-level parameters override path-level parameters with the same
+    # (in, name) key, as defined by the OpenAPI operation model.
+    for container in (path_item, op):
+        params = container.get("parameters") or []
+        if not isinstance(params, list):
             continue
-        key = param_key(p)
-        if not key[1]:
-            continue
-        schema = resolve_ref(root, p.get("schema") or {})
-        out[key] = {
-            "required": bool(p.get("required")),
-            "schema": schema if isinstance(schema, dict) else {},
-        }
+        for raw in params:
+            p = resolve_ref(root, raw)
+            if not isinstance(p, dict):
+                continue
+            key = param_key(p)
+            if not key[1]:
+                continue
+            schema = resolve_ref(root, p.get("schema") or {})
+            out[key] = {
+                "required": bool(p.get("required")),
+                "schema": schema if isinstance(schema, dict) else {},
+            }
     return out
 
 
@@ -375,12 +431,14 @@ def compare_parameters(
     deltas: list[Delta],
     root_old: dict[str, Any],
     root_new: dict[str, Any],
+    old_path_item: dict[str, Any],
+    new_path_item: dict[str, Any],
     oop: dict[str, Any],
     nop: dict[str, Any],
     loc: str,
 ) -> None:
-    old_p = normalize_params(root_old, oop)
-    new_p = normalize_params(root_new, nop)
+    old_p = normalize_params(root_old, old_path_item, oop)
+    new_p = normalize_params(root_new, new_path_item, nop)
     for key in sorted(set(old_p) - set(new_p)):
         where, name = key
         add_delta(
@@ -412,14 +470,94 @@ def compare_parameters(
                 path=ploc,
                 detail=f"{where} parameter became required: {name}",
             )
-        compare_schemas(deltas, o["schema"], n["schema"], ploc, side="request")
+        compare_schemas(
+            deltas,
+            o["schema"],
+            n["schema"],
+            ploc,
+            side="request",
+            old_root=root_old,
+            new_root=root_new,
+        )
+
+
+def compare_request_body(
+    deltas: list[Delta],
+    root_old: dict[str, Any],
+    root_new: dict[str, Any],
+    oop: dict[str, Any],
+    nop: dict[str, Any],
+    loc: str,
+) -> None:
+    old_body = request_body(root_old, oop)
+    new_body = request_body(root_new, nop)
+    if old_body is None and new_body is None:
+        return
+    if old_body is None:
+        add_delta(
+            deltas,
+            kind="request_body_added",
+            cls="breaking" if bool(new_body.get("required")) else "non-breaking",
+            path=f"{loc} request body",
+            detail="request body added" + (" (required)" if new_body.get("required") else ""),
+        )
+        return
+    if new_body is None:
+        add_delta(
+            deltas,
+            kind="request_body_removed",
+            cls="breaking",
+            path=f"{loc} request body",
+            detail="request body removed",
+        )
+        return
+
+    old_required = bool(old_body.get("required"))
+    new_required = bool(new_body.get("required"))
+    if old_required != new_required:
+        add_delta(
+            deltas,
+            kind="request_body_required",
+            cls="breaking" if new_required else "non-breaking",
+            path=f"{loc} request body",
+            detail=f"request body required {old_required} -> {new_required}",
+        )
+
+    old_content = body_content(root_old, old_body)
+    new_content = body_content(root_new, new_body)
+    for media_type in sorted(set(old_content) - set(new_content)):
+        add_delta(
+            deltas,
+            kind="request_content_type_removed",
+            cls="breaking",
+            path=f"{loc} request body {media_type}",
+            detail=f"request content type removed: {media_type}",
+        )
+    for media_type in sorted(set(new_content) - set(old_content)):
+        add_delta(
+            deltas,
+            kind="request_content_type_added",
+            cls="non-breaking",
+            path=f"{loc} request body {media_type}",
+            detail=f"request content type added: {media_type}",
+        )
+    for media_type in sorted(set(old_content) & set(new_content)):
+        compare_schemas(
+            deltas,
+            old_content[media_type],
+            new_content[media_type],
+            f"{loc} request body {media_type}",
+            side="request",
+            old_root=root_old,
+            new_root=root_new,
+        )
 
 
 def diff_specs(old: dict[str, Any], new: dict[str, Any]) -> list[Delta]:
     deltas: list[Delta] = []
 
-    old_ops = {(p, m): op for p, m, op in iter_operations(old)}
-    new_ops = {(p, m): op for p, m, op in iter_operations(new)}
+    old_ops = {(p, m): (op, item) for p, m, op, item in iter_operations(old)}
+    new_ops = {(p, m): (op, item) for p, m, op, item in iter_operations(new)}
 
     for key in sorted(set(old_ops) - set(new_ops)):
         path, method = key
@@ -445,7 +583,8 @@ def diff_specs(old: dict[str, Any], new: dict[str, Any]) -> list[Delta]:
     for key in sorted(set(old_ops) & set(new_ops)):
         path, method = key
         loc = f"{method.upper()} {path}"
-        oop, nop = old_ops[key], new_ops[key]
+        oop, old_path_item = old_ops[key]
+        nop, new_path_item = new_ops[key]
 
         # security
         os_ = security_sig(op_security(old, oop))
@@ -489,16 +628,19 @@ def diff_specs(old: dict[str, Any], new: dict[str, Any]) -> list[Delta]:
             )
 
         # parameters (path/query/header)
-        compare_parameters(deltas, old, new, oop, nop, loc)
-
-        # request schema
-        compare_schemas(
+        compare_parameters(
             deltas,
-            request_schema(old, oop),
-            request_schema(new, nop),
-            f"{loc} request",
-            side="request",
+            old,
+            new,
+            old_path_item,
+            new_path_item,
+            oop,
+            nop,
+            loc,
         )
+
+        # request body presence, requiredness, media types, and schemas
+        compare_request_body(deltas, old, new, oop, nop, loc)
 
         # primary success response body: prefer 200 then 201 then first 2xx
         old_resps = response_schemas(old, oop)
@@ -524,6 +666,8 @@ def diff_specs(old: dict[str, Any], new: dict[str, Any]) -> list[Delta]:
                 new_resps[code],
                 f"{loc} response[{code}]",
                 side="response",
+                old_root=old,
+                new_root=new,
             )
 
     return deltas

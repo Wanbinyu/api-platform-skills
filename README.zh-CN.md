@@ -90,6 +90,9 @@ python scripts/openapi_breaking_diff.py old.yaml new.yaml
 | 插件 | `/plugin marketplace add Wanbinyu/api-platform-skills` |
 | **只要一个 skill** | 例如 https://github.com/Wanbinyu/skill-breaking-change-review |
 
+默认安装只更新本包已有文件，不会删除目标目录中的其他文件。只有显式使用
+`-Clean` / `--clean` 才会在复制前清理每个已有的本包 skill 目录。
+
 ---
 
 ## 姊妹包
@@ -114,3 +117,12 @@ python scripts/openapi_breaking_diff.py old.yaml new.yaml
 ## 许可证
 
 MIT · [Wanbinyu](https://github.com/Wanbinyu)
+
+## 本地校验
+
+```powershell
+python -m pip install "PyYAML>=6.0,<7"
+python scripts/validate_skills.py
+python -m unittest discover -s tests -v
+python scripts/smoke_install.py
+```

@@ -10,7 +10,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT" /></a>
   <a href="https://github.com/agentskills/agentskills"><img src="https://img.shields.io/badge/format-Agent%20Skills-111827" alt="Agent Skills" /></a>
-  <a href="https://github.com/Wanbinyu/api-platform-skills/releases"><img src="https://img.shields.io/badge/version-0.1.4-0ea5e9" alt="v0.1.4" /></a>
+  <a href="https://github.com/Wanbinyu/api-platform-skills/releases"><img src="https://img.shields.io/badge/version-0.1.3-0ea5e9" alt="v0.1.3" /></a>
   <img src="https://img.shields.io/badge/Claude-Codex-Cursor-7c3aed" alt="harnesses" />
 </p>
 
@@ -103,6 +103,10 @@ python scripts/openapi_breaking_diff.py \
 
 macOS/Linux: `./scripts/install.sh --claude`
 
+Installers update this package's files without deleting unrelated files by default. Use
+`-Clean` / `--clean` only when you explicitly want to remove each existing package skill
+directory before copying.
+
 ---
 
 ## Sister pack (tools for agents)
@@ -142,3 +146,12 @@ Details: [docs/NOT-ANOTHER-API-DESIGN-PACK.md](docs/NOT-ANOTHER-API-DESIGN-PACK.
 ## License
 
 MIT · [Wanbinyu](https://github.com/Wanbinyu)
+
+## Validate locally
+
+```powershell
+python -m pip install "PyYAML>=6.0,<7"
+python scripts/validate_skills.py
+python -m unittest discover -s tests -v
+python scripts/smoke_install.py
+```

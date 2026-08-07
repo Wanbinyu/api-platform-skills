@@ -7,3 +7,5 @@ Thumbs.db
 .agents/skills/
 .cursor/skills/
 .github/skills/
+__pycache__/
+.pytest_cache/
